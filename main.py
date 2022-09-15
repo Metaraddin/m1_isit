@@ -1,51 +1,49 @@
 from apriori_python import apriori
 from efficient_apriori import apriori as eff_apriori
 from fpgrowth_py import fpgrowth
+from PyARMViz import PyARMViz
+import timeit
 
 
-transactions = [['Стиральная машина', 'Телевизор'],
-                ['Духовой шкаф', 'Микроволновая печь', 'Сушильная машина'],
-                ['Телевизор', 'Ноутбук'],
-                ['Тостер', 'Холодильник', 'Морозильник'],
-                ['Тостер', 'Телевизор'],
-                ['Духовой шкаф', 'Телевизор'],
-                ['Стиральная машина', 'Сушильная машина', 'Тостер', 'Духовой шкаф'],
-                ['Ноутбук', 'Тостер'],
-                ['Телевизор', 'Холодильник', 'Морозильник'],
-                ['Стиральная машина', 'Тостер'],
-                ['Ноутбук', 'Сушильная машина', 'Телевизор', 'Тостер'],
-                ['Духовой шкаф', 'Сушильная машина'],
-                ['Морозильник', 'Холодильник', 'Телевизор'],
-                ['Стиральная машина', 'Сушильная машина'],
-                ['Тостер', 'Ноутбук'],
-                ['Холодильник', 'Духовой шкаф', 'Ноутбук', 'Телевизор'],
-                ['Ноутбук', 'Стиральная машина', 'Тостер', 'Духовой шкаф'],
-                ['Телевизор', 'Ноутбук', 'Морозильник'],
-                ['Ноутбук', 'Стиральная машина'],
-                ['Тостер', 'Духовой шкаф']]
+transactions = [['Стиральная машина', 'Сушильная машина', 'Духовой шкаф', 'Телевизор', 'Ноутбук'],
+                ['Микроволновая печь', 'Ноутбук', 'Стиральная машина', 'Сушильная машина'],
+                ['Стиральная машина', 'Сушильная машина', 'Микроволновая печь', 'Холодильник'],
+                ['Морозильник', 'Духовой шкаф', 'Тостер', 'Стиральная машина'],
+                ['Стиральная машина', 'Сушильная машина', 'Ноутбук	Микроволновая печь	Чайник'],
+                ['Чайник', 'Морозильник', 'Тостер', 'Духовой шкаф'],
+                ['Морозильник', 'Духовой шкаф', 'Стиральная машина', 'Сушильная машина', 'Ноутбук'],
+                ['Стиральная машина', 'Сушильная машина', 'Телевизор'],
+                ['Ноутбук', 'Микроволновая печь', 'Холодильник', 'Сушильная машина'],
+                ['Сушильная машина', 'Стиральная машина', 'Ноутбук', 'Холодильник', 'Чайник'],
+                ['Телевизор', 'Стиральная машина', 'Сушильная машина', 'Ноутбук'],
+                ['Холодильник', 'Сушильная машина', 'Ноутбук', 'Стиральная машина'],
+                ['Микроволновая печь', 'Холодильник', 'Сушильная машина'],
+                ['Микроволновая печь', 'Духовой шкаф', 'Телевизор'],
+                ['Духовой шкаф', 'Ноутбук', 'Стиральная машина', 'Сушильная машина'],
+                ['Стиральная машина', 'Сушильная машина', 'Микроволновая печь', 'Ноутбук', 'Телевизор'],
+                ['Морозильник', 'Тостер', 'Духовой шкаф', 'Сушильная машина'],
+                ['Стиральная машина', 'Морозильник', 'Духовой шкаф', 'Сушильная машина'],
+                ['Холодильник', 'Телевизор'],
+                ['Стиральная машина', 'Микроволновая печь', 'Ноутбук', 'Сушильная машина']]
 
 
-def apriori_alg(data):
-    freq_item_set, rules = apriori(data, minSup=0.2, minConf=0.2)
-    print(rules)
+print('Apriori: ', timeit.timeit('lambda: apriori(data, minSup=0.5, minConf=0.5)', number=1000))
+print('Efficient Apriori: ', timeit.timeit('lambda: eff_apriori(data, min_support=0.5, min_confidence=0.5)', number=1000))
+print('FPGrowth: ', timeit.timeit('lambda: fpgrowth(data, minSupRatio=0.5, minConf=0.5)', number=1000))
 
+rules = apriori(transactions, minSup=0.5, minConf=0.5)[1]
+print('\nApriori:')
+for rule in rules:
+    print(rule)
 
-def efficient_apriori_alg(data):
-    freq_item_set, rules = eff_apriori(data, min_support=0.5, min_confidence=0.5)
-    print(rules, '\n')
-    rules_rhs = filter(lambda rule: len(rule.lhs) == 1 and len(rule.rhs) == 1, rules)
-    for rule in sorted(rules_rhs, key=lambda rule: rule.confidence):
-        print(rule)
+rules = eff_apriori(transactions, min_support=0.5, min_confidence=0.5)[1]
+print('\nEfficient Apriori:')
+rules_rhs = filter(lambda rule: len(rule.lhs) == 1 and len(rule.rhs) == 1, rules)
+for rule in sorted(rules_rhs, key=lambda rule: rule.confidence):
+    print(rule)
+PyARMViz.adjacency_graph_plotly(rules)
 
-
-def fpgrowth_alg(data):
-    try:
-        freq_item_set, rules = fpgrowth(data, minSupRatio=0.5, minConf=0.5)
-        print(rules)
-    except TypeError:
-        pass
-
-
-# apriori_alg(transactions)
-# efficient_apriori_alg(transactions)
-# fpgrowth_alg(transactions)
+rules = fpgrowth(transactions, minSupRatio=0.5, minConf=0.5)[1]
+print('\nFPGrowth:')
+for rule in rules:
+    print(rule)
