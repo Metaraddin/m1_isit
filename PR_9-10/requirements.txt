@@ -1,0 +1,10 @@
+jupyter
+numpy
+geneticalgorithm2
+matplotlib
+OptimizationTestFunctions
+scipy
+sklearn
+umap-learn
+seaborn
+imblearn
